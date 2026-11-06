@@ -12,6 +12,8 @@ Generating test tables dynamically in every test suite requires spinning up Apac
 
 ## Maven & Gradle Coordinates
 
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.vladislav-sidorovich/delta-verification.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.vladislav-sidorovich/delta-verification)
+
 ### Gradle (Groovy DSL)
 
 ```groovy
