@@ -1,0 +1,116 @@
+plugins {
+    id 'java-library'
+    id 'com.vanniktech.maven.publish' version '0.34.0'
+}
+
+group = findProperty('GROUP') ?: 'io.github.vladislav-sidorovich'
+version = findProperty('VERSION_NAME') ?: '0.1.0'
+description = 'Static Delta Lake reference and golden tables packaged for read conformance and integration testing.'
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+tasks.named('compileJava', JavaCompile) {
+    options.release = 8
+}
+
+tasks.named('compileTestJava', JavaCompile) {
+    options.release = 17
+}
+
+tasks.withType(Javadoc).configureEach {
+    options.encoding = 'UTF-8'
+    options.addStringOption('Xdoclint:none', '-quiet')
+}
+
+// Ensure hidden Hadoop checksum (.crc) files in golden tables are never excluded
+tasks.withType(ProcessResources).configureEach {
+    filteringCharset = 'UTF-8'
+}
+
+tasks.withType(AbstractArchiveTask).configureEach {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+    from(rootProject.files('LICENSE', 'NOTICE')) {
+        into 'META-INF'
+    }
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.14.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test', Test) {
+    dependsOn tasks.named('jar')
+    useJUnitPlatform()
+    doFirst {
+        systemProperty 'delta.verification.jar', tasks.named('jar').get().archiveFile.get().asFile.absolutePath
+        systemProperty 'delta.verification.goldenRoot', file('src/main/resources/golden').absolutePath
+    }
+}
+
+tasks.register('validateFixtures', Exec) {
+    description = 'Validates that delta-verification/index.json matches src/main/resources/golden.'
+    group = 'verification'
+    commandLine 'python3', 'dev/validate_fixtures.py'
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('validateFixtures')
+}
+
+def hasSigningCredentials = providers.gradleProperty('signingInMemoryKey').present ||
+        providers.gradleProperty('signing.keyId').present ||
+        providers.gradleProperty('signing.gnupg.keyName').present ||
+        providers.environmentVariable('ORG_GRADLE_PROJECT_signingInMemoryKey').present
+
+mavenPublishing {
+    publishToMavenCentral()
+    if (hasSigningCredentials) {
+        signAllPublications()
+    }
+
+    coordinates(group.toString(), 'delta-verification', version.toString())
+
+    pom {
+        name = 'Delta Verification'
+        description = project.description
+        url = 'https://github.com/vladislav-sidorovich/delta-verification'
+        inceptionYear = '2026'
+
+        licenses {
+            license {
+                name = 'MIT License'
+                url = 'https://opensource.org/licenses/MIT'
+                distribution = 'repo'
+            }
+        }
+
+        developers {
+            developer {
+                id = 'vladislav-sidorovich'
+                name = 'Vladislav Sidorovich'
+                url = 'https://github.com/vladislav-sidorovich'
+            }
+        }
+
+        scm {
+            url = 'https://github.com/vladislav-sidorovich/delta-verification'
+            connection = 'scm:git:git://github.com/vladislav-sidorovich/delta-verification.git'
+            developerConnection = 'scm:git:ssh://git@github.com/vladislav-sidorovich/delta-verification.git'
+        }
+    }
+}

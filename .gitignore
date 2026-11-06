@@ -1,0 +1,14 @@
+.gradle/
+build/
+out/
+bin/
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.DS_Store
+Thumbs.db
+.venv/
+__pycache__/
+*.pyc

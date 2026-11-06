@@ -1,0 +1,17 @@
+import org.apache.tools.ant.DirectoryScanner
+
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+// Delta golden tables include Hadoop checksum files named `._last_checkpoint.crc`
+// and partition directories containing `%` or `#` characters, which would otherwise
+// match Ant/Gradle's default exclude patterns (`**/._*`, `**/%*%`, `**/#*#`).
+DirectoryScanner.removeDefaultExclude('**/._*')
+DirectoryScanner.removeDefaultExclude('**/%*%')
+DirectoryScanner.removeDefaultExclude('**/#*#')
+
+rootProject.name = 'delta-verification'
