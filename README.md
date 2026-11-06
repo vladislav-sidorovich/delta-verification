@@ -118,14 +118,6 @@ Non-JVM implementations can pin this repository as a Git submodule or checkout a
 
 Publishing is configured via [`com.vanniktech.maven.publish`](https://github.com/vanniktech/gradle-maven-publish-plugin) targeting the [Sonatype Central Portal](https://central.sonatype.com/) under group ID `io.github.vladislav-sidorovich`.
 
-To publish via GitHub Actions ([`.github/workflows/publish.yml`](.github/workflows/publish.yml)):
-1. Configure the following repository secrets in GitHub (`Settings -> Secrets and variables -> Actions`):
-   - `MAVEN_CENTRAL_USERNAME`: Sonatype Central Portal user token username
-   - `MAVEN_CENTRAL_PASSWORD`: Sonatype Central Portal user token password
-   - `SIGNING_KEY`: ASCII-armored PGP private key (`gpg --armor --export-secret-keys <KEY_ID>`)
-   - `SIGNING_PASSWORD`: Passphrase for the PGP private key
-2. Push a version tag matching `v*.*.*` (for example `git tag v0.1.0 && git push origin v0.1.0`) or trigger the **Publish to Maven Central** workflow manually.
-
 ## License & Attribution
 
 - The project structure, build configuration, tooling, and Java helper library in this repository are licensed under the **[MIT License](LICENSE)**.
